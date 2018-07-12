@@ -4,20 +4,21 @@
 #
 # Copyright:: 2018, The Authors, All Rights Reserved.
 
-yum_package 'wget' do
-  action :install
-end
-
+# install tomcat
 yum_package 'tomcat' do
   action :install
 end
 
-execute 'wget' do
-  command 'wget http://tomcat.apache.org/tomcat-6.0-doc/appdev/sample/sample.war -O /tmp/sample.war'
-  action :run
+# put sample war file into webapps folder
+remote_file '/usr/share/tomcat/webapps/sample.war' do
+  source 'http://tomcat.apache.org/tomcat-6.0-doc/appdev/sample/sample.war'
+  owner 'root'
+  group 'root'
+  mode '0755'
+  action :create
 end
 
+# start tomcat
 service 'tomcat' do
-  action :start
+  action [:enable, :start]
 end
-
