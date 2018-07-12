@@ -9,27 +9,18 @@ execute 'yum' do
   action :run
 end
 
-
 package 'haproxy' do
   action :install
 end
 
-template '/etc/default/haproxy' do
-  source 'haproxy-default.erb'
-  owner 'root'
-    group 'root'
-  mode 0644
+template '/etc/haproxy/haproxy.cfg' do
+  source 'haproxy.cfg.erb'
+  variables(backend_nodes: search(:node, 'chef_environment:_default')
+  .sort_by(&:name))
+  notifies :reload, 'service[haproxy]'
 end
 
 service 'haproxy' do
-  supports :restart => true, :status => true, :reload => true
-  action [:enable, :start]
-end
-
-template '/etc/haproxy/haproxy.cfg' do
-  source 'haproxy.cfg.erb'
-  owner 'root'
-  group 'root'
-  mode 0644
-  notifies :restart, 'service[haproxy]'
+  supports restart: true, status: true, reload: true
+  action %i[enable start]
 end
